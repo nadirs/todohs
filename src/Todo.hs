@@ -52,8 +52,8 @@ priority t = case status t of
     Todo (Just p) -> Just p
     _ -> Nothing
 
-isDone :: Task -> Bool
-isDone t = case status t of
+complete :: Task -> Bool
+complete t = case status t of
     Done _ -> True
     _ -> False
 
@@ -84,10 +84,10 @@ parseStatus :: Parser TodoStatus
 parseStatus = (Done <$> parseComplete) <|> (Todo <$> optional parsePriority)
 
 parsePriority :: Parser Priority
-parsePriority = char '(' *> upper <* char ')' <* some space
+parsePriority = try $ char '(' *> upper <* char ')' <* some space
 
 parseComplete :: Parser (Maybe Date)
-parseComplete = do
+parseComplete = try $ do
         _ <- char 'x'
         _ <- char ' '
         d <- optional parseDate
