@@ -16,7 +16,9 @@ build-type:         Simple
 cabal-version:      >=1.10
 
 library
-  exposed-modules:  Todo
+  exposed-modules:  Todo.Data,
+                    Todo.Read,
+                    Todo.Show
   -- other-modules:
   default-extensions: OverloadedStrings
   -- other-extensions:
