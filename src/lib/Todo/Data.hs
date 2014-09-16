@@ -1,8 +1,7 @@
 {-# OPTIONS_GHC -Wall #-}
-module Todo.Data (
-                 Task(..), TodoStatus(..)
+module Todo.Data ( Task(..), TodoStatus(..)
                  , Priority, Date, Content
-                 , priority, complete, completeDate
+                 , priority, isComplete, completeDate
                  , onDate, dateFormat
                  ) where
 
@@ -28,8 +27,8 @@ priority t = case status t of
     Todo (Just p) -> Just p
     _ -> Nothing
 
-complete :: Task -> Bool
-complete t = case status t of
+isComplete :: Task -> Bool
+isComplete t = case status t of
     Done _ -> True
     _ -> False
 
