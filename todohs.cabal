@@ -19,7 +19,8 @@ library
   exposed-modules:  Todo
   other-modules:    Todo.Data,
                     Todo.Read,
-                    Todo.Show
+                    Todo.Show,
+                    Todo.Predicates
   default-extensions: OverloadedStrings
   -- other-extensions:
   build-depends:    base >=4.7 && <4.8,

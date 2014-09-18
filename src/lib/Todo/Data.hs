@@ -1,7 +1,7 @@
 {-# OPTIONS_GHC -Wall #-}
 module Todo.Data ( Task(..), TodoStatus(..)
                  , Priority, Date, Content
-                 , priority, isComplete, completeDate
+                 , priority, completeDate
                  , onDate, dateFormat
                  ) where
 
@@ -26,11 +26,6 @@ priority :: Task -> Maybe Priority
 priority t = case status t of
     Todo (Just p) -> Just p
     _ -> Nothing
-
-isComplete :: Task -> Bool
-isComplete t = case status t of
-    Done _ -> True
-    _ -> False
 
 completeDate :: Task -> Maybe Date
 completeDate t = let st = status t in case st of
