@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC -Wall #-}
-module Todo.Read (readTask) where
+module Todo.Read (readTask, readTasks) where
 
 import Todo.Data
 import Control.Applicative
@@ -9,6 +9,9 @@ import Control.Monad (join)
 import Data.List (intercalate)
 import Data.Text (pack)
 import Data.Time (parseTime)
+
+readTasks :: String -> [Task]
+readTasks = map readTask . lines
 
 readTask :: String -> Task
 readTask s = case parse parseTask "" (pack s) of

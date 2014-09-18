@@ -2,8 +2,8 @@
 module Todo ( Task(..), priority, completeDate
             , Priority, Date, Content
             , TodoStatus(..)
-            , readTask
-            , showTask, showStatus, showDate
+            , readTask, readTasks
+            , showTask, showTasks, showStatus, showDate
             , newerThan, isComplete
             ) where
 
