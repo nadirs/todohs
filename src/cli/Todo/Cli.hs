@@ -69,7 +69,9 @@ sort (Just s) = sortBy sorter
         SortDateDesc -> desc maybeDate
         SortPriorityAsc -> asc priority
         SortPriorityDesc -> desc priority
+    asc :: Ord b => (a -> b) -> a -> a -> Ordering
     asc = on compare
+    desc :: Ord b => (a -> b) -> a -> a -> Ordering
     desc = on $ flip compare
 sort _ = id
 
