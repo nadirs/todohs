@@ -4,7 +4,7 @@ module Todo ( Task(..), priority, completeDate
             , TodoStatus(..)
             , readTask, readTasks
             , showTask, showTasks, showStatus, showDate
-            , newerThan, isComplete
+            , minDate, maxDate, minPriority, maxPriority, isComplete
             ) where
 
 import Todo.Data
