@@ -61,14 +61,12 @@ query q = filter $ case q of
             -- warn us about the non-exhaustive pattern matching
 
 sort :: Maybe SortArg -> [Task] -> [Task]
-sort (Just s) = sortBy sorter
-  where
-    sorter :: Task -> Task -> Ordering
-    sorter = case s of
+sort (Just s) = sortBy $ case s of
         SortDateAsc -> asc maybeDate
         SortDateDesc -> desc maybeDate
         SortPriorityAsc -> asc priority
         SortPriorityDesc -> desc priority
+ where
     asc :: Ord b => (a -> b) -> a -> a -> Ordering
     asc = on compare
     desc :: Ord b => (a -> b) -> a -> a -> Ordering
