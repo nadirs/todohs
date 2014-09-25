@@ -2,8 +2,8 @@
 module Todo.Cli (run) where
 
 import Data.List (sortBy, isInfixOf)
-import Data.Function (on)
 import Data.Char (toLower, isUpper)
+import Data.Ord (comparing)
 import System.IO
 import qualified System.IO.Strict as S
 import Options.Applicative
@@ -39,7 +39,7 @@ run = do
             putStr $ showTasks ts
         CmdAdd t p -> do
             oldRepo <- withFile p ReadMode S.hGetContents
-            let newRepo = sortBy (compare `on` maybeDate) $ t : readTasks oldRepo
+            let newRepo = t : readTasks oldRepo
             withFile p WriteMode $ flip hPutStr (showTasks newRepo)
         CmdQuery p qs s -> do
             allTasks <- withFile p ReadMode (fmap readTasks . S.hGetContents)
@@ -68,9 +68,9 @@ sort (Just s) = sortBy $ case s of
         SortPriorityDesc -> desc priority
  where
     asc :: Ord b => (a -> b) -> a -> a -> Ordering
-    asc = on compare
+    asc = comparing
     desc :: Ord b => (a -> b) -> a -> a -> Ordering
-    desc = on $ flip compare
+    desc f = flip $ comparing f
 sort _ = id
 
 parseCommand :: Parser Command
@@ -102,9 +102,11 @@ queryArgs = many $
   where
     qDone = flag' QueryDone (short 'c' <> long "complete" <> help "Complete tasks only")
     qTodo = flag' QueryTodo (short 'C' <> long "no-complete" <> help "Incomplete tasks only")
-    qMinPriority = QueryMinPriority <$> priorityOption (short 'm' <> long "min-priority" <> metavar "MIN" <> help "tasks with priority at least MIN")
-    qMaxPriority = QueryMaxPriority <$> priorityOption (short 'M' <> long "max-priority" <> metavar "MAX" <> help "tasks with priority at most MAX")
+    qMinPriority = QueryMinPriority <$> bindPriority <$> priorityOption (short 'm' <> long "min-priority" <> metavar "MIN" <> help "tasks with priority at least MIN")
+    qMaxPriority = QueryMaxPriority <$> bindPriority <$> priorityOption (short 'M' <> long "max-priority" <> metavar "MAX" <> help "tasks with priority at most MAX")
     qContentLike = QueryContentLike <$> strOption (short 'l' <> long "like" <> metavar "TEXT" <> help "task with content like TEXT")
+    bindPriority :: Maybe Char -> Maybe Priority
+    bindPriority mc = mc >>= mkPriority
 
 priorityOption ::  Mod OptionFields (Maybe Char) -> Parser (Maybe Char)
 priorityOption = option char where

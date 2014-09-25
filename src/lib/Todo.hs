@@ -1,6 +1,7 @@
 {-# OPTIONS_GHC -Wall #-}
 module Todo ( Task(..), priority, completeDate
-            , Priority, Date, Content
+            , Priority(..), Date, Content
+            , mkPriority
             , TodoStatus(..)
             , readTask, readTasks
             , showTask, showTasks, showStatus, showDate

@@ -1,14 +1,29 @@
 {-# OPTIONS_GHC -Wall #-}
 module Todo.Data ( Task(..), TodoStatus(..)
-                 , Priority, Date, Content
+                 , Priority(..), Date, Content
                  , priority, completeDate
+                 , mkPriority
                  , onDate, dateFormat
                  ) where
 
+import Data.Char (isUpper)
+import Data.Ord (comparing)
 import Data.Time (UTCTime)
 import System.Locale (TimeLocale, defaultTimeLocale)
 
-type Priority = Char
+newtype Priority = Priority { unPriority :: Char } deriving Eq
+
+mkPriority :: Char -> Maybe Priority
+mkPriority c
+    | isUpper c = Just (Priority c)
+    | otherwise = Nothing
+
+instance Show Priority where
+    show = show . unPriority
+
+instance Ord Priority where
+    compare = flip $ comparing unPriority
+
 type Date = UTCTime
 type Content = String
 

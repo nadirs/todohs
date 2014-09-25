@@ -32,7 +32,7 @@ parseStatus :: Parser TodoStatus
 parseStatus = (Done <$> parseComplete) <|> (Todo <$> optional parsePriority)
 
 parsePriority :: Parser Priority
-parsePriority = try $ char '(' *> upper <* char ')' <* some space
+parsePriority = Priority <$> try (char '(' *> upper <* char ')' <* some space)
 
 parseComplete :: Parser (Maybe Date)
 parseComplete = try $ do

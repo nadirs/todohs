@@ -20,7 +20,7 @@ showTask t = merge [st, date, text]
 
 showStatus :: Task -> String
 showStatus t = case status t of
-    Todo (Just p) -> '(' : p : ")"
+    Todo (Just p) -> '(' : unPriority p : ")"
     Done x -> "x " ++ case x of
         Just d -> showDate d
         _ -> ""
