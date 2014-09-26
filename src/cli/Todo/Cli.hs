@@ -10,11 +10,12 @@ import Options.Applicative
 import Todo
 
 type TaskArg = Task
-type RepoFilePath = String
+type RepoReader = (String -> [Task]) -> IO [Task]
+type RepoWriter = [Task] -> IO ()
 
-data Command = CmdAdd TaskArg RepoFilePath
-             | CmdList RepoFilePath
-             | CmdQuery RepoFilePath [QueryArg] (Maybe SortArg)
+data Command = CmdAdd TaskArg RepoReader RepoWriter
+             | CmdList RepoReader
+             | CmdQuery RepoReader [QueryArg] (Maybe SortArg)
 
 data QueryArg = QueryTodo                           -- [-C | --no-complete] means not complete
               | QueryDone                           -- [-c | --complete] means complete
@@ -33,17 +34,25 @@ run :: IO ()
 run = do
     cmd <- execParser $ info (helper <*> parseCommand) idm
     case cmd of
-        CmdList p -> do
-            repo <- withFile p ReadMode S.hGetContents
-            let ts = readTasks repo
-            putStr $ showTasks ts
-        CmdAdd t p -> do
-            oldRepo <- withFile p ReadMode S.hGetContents
-            let newRepo = t : readTasks oldRepo
-            withFile p WriteMode $ flip hPutStr (showTasks newRepo)
-        CmdQuery p qs s -> do
-            allTasks <- withFile p ReadMode (fmap readTasks . S.hGetContents)
+        CmdList r -> putStr . showTasks =<< r readTasks
+        CmdAdd t r w -> do
+            oldRepo <- r readTasks
+            w (t : oldRepo)
+        CmdQuery r qs s -> do
+            allTasks <- r readTasks
             putStr . showTasks . sort s . foldr query allTasks $ qs
+
+repoFileReader :: FilePath -> RepoReader
+repoFileReader f h = withFile f ReadMode (fmap h . S.hGetContents)
+
+repoStdin :: RepoReader
+repoStdin h = h <$> S.getContents
+
+repoFileWriter :: FilePath -> RepoWriter
+repoFileWriter f ts = withFile f WriteMode $ flip hPutStr (showTasks ts)
+
+repoStdout :: RepoWriter
+repoStdout = putStr . showTasks
 
 query :: QueryArg -> [Task] -> [Task]
 query q = filter $ case q of
@@ -77,20 +86,27 @@ parseCommand :: Parser Command
 parseCommand = subparser $ cmdAdd <> cmdList <> cmdQuery
 
 cmdAdd :: Mod CommandFields Command
-cmdAdd = command "add" $ info (CmdAdd <$> fmap readTask taskInput <*> pathArgument)
+cmdAdd = command "add" $ info (CmdAdd <$> fmap readTask taskInput <*> repoReaderArg <*> repoWriterArg)
     (briefDesc <> progDesc "Add TASK to REPO")
   where
     taskInput = strArgument $ metavar "TASK"
 
 cmdList :: Mod CommandFields Command
-cmdList = command "list" $ info (CmdList <$> pathArgument)
-    (briefDesc <> progDesc "List all tasks from REPO")
+cmdList = command "list" $ info (CmdList <$> repoReaderArg)
+    (briefDesc <> progDesc "List all tasks from REPO (or stdin if missing)")
 
-pathArgument :: Parser String
-pathArgument = strArgument (metavar "PATH")
+repoReaderArg :: Parser RepoReader
+repoReaderArg = pathArg <|> pure repoStdin
+  where
+    pathArg = repoFileReader <$> strOption (short 'i' <> long "input" <> metavar "REPO" <> help "tasks source")
+
+repoWriterArg :: Parser RepoWriter
+repoWriterArg = pathArg <|> pure repoStdout
+  where
+    pathArg = repoFileWriter <$> strOption (short 'o' <> long "output" <> metavar "REPO" <> help "tasks destination")
 
 cmdQuery :: Mod CommandFields Command
-cmdQuery = command "query" $ info (CmdQuery <$> pathArgument <*> queryArgs <*> sortArg)
+cmdQuery = command "query" $ info (CmdQuery <$> repoReaderArg <*> queryArgs <*> sortArg)
     (briefDesc <> progDesc "Query REPO according to specified filters")
 
 queryArgs :: Parser [QueryArg]
