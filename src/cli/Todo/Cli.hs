@@ -47,25 +47,25 @@ run = do
 
 query :: QueryArg -> [Task] -> [Task]
 query q = filter $ case q of
-        QueryTodo -> not . isComplete
-        QueryDone -> isComplete
-        QueryMinPriority (Just m) -> minPriority m
-        QueryMinPriority _ -> const True
-        QueryMaxPriority (Just m) -> maxPriority m
-        QueryMaxPriority _ -> const True
-        QueryContentLike s -> isInfixOf s' . lower . content where
-            s' = lower s
-            lower = map toLower
-            -- let's avoid universal pattern matching so if we add
-            -- a new QueryArg constructor option the compiler can
-            -- warn us about the non-exhaustive pattern matching
+    QueryTodo -> not . isComplete
+    QueryDone -> isComplete
+    QueryMinPriority (Just m) -> minPriority m
+    QueryMinPriority _ -> const True
+    QueryMaxPriority (Just m) -> maxPriority m
+    QueryMaxPriority _ -> const True
+    QueryContentLike s -> isInfixOf s' . lower . content where
+        s' = lower s
+        lower = map toLower
+        -- let's avoid universal pattern matching so if we add
+        -- a new QueryArg constructor option the compiler can
+        -- warn us about the non-exhaustive pattern matching
 
 sort :: Maybe SortArg -> [Task] -> [Task]
 sort (Just s) = sortBy $ case s of
-        SortDateAsc -> asc maybeDate
-        SortDateDesc -> desc maybeDate
-        SortPriorityAsc -> asc priority
-        SortPriorityDesc -> desc priority
+    SortDateAsc -> asc maybeDate
+    SortDateDesc -> desc maybeDate
+    SortPriorityAsc -> asc priority
+    SortPriorityDesc -> desc priority
  where
     asc :: Ord b => (a -> b) -> a -> a -> Ordering
     asc = comparing
