@@ -11,6 +11,9 @@ import Data.Ord (comparing)
 import Data.Time (UTCTime)
 import System.Locale (TimeLocale, defaultTimeLocale)
 
+type Date = UTCTime
+type Content = String
+
 newtype Priority = Priority { unPriority :: Char } deriving Eq
 
 mkPriority :: Char -> Maybe Priority
@@ -23,9 +26,6 @@ instance Show Priority where
 
 instance Ord Priority where
     compare = flip $ comparing unPriority
-
-type Date = UTCTime
-type Content = String
 
 data TodoStatus = Todo (Maybe Priority)
                 | Done (Maybe Date)
@@ -43,7 +43,7 @@ priority t = case status t of
     _ -> Nothing
 
 completeDate :: Task -> Maybe Date
-completeDate t = let st = status t in case st of
+completeDate t = case status t of
     Done d -> d
     _ -> Nothing
 
